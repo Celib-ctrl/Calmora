@@ -30,7 +30,7 @@
             z-index: 9999;
         }
 
-        /* Loading Bar Container */
+        /* Loading Bar */
         #loading-bar-container {
             position: relative;
             width: 320px;
@@ -42,7 +42,6 @@
             box-shadow: 0 0 10px rgba(255, 140, 0, 0.9);
         }
 
-        /* Loading Bar (Gradient Fill) */
         #loading-bar {
             height: 100%;
             width: 0%;
@@ -130,42 +129,37 @@
             text-align: center;
         }
 
-        /* Calendar Button Styling */
-        #calendar-button {
-            position: absolute;
+        /* Top Right Button */
+        #top-right-button {
+            position: fixed;
             top: 10px;
             right: 10px;
-            z-index: 10000;
-        }
-
-        #calendar-button img {
-            width: 50px;
-            height: 50px;
+            background: none;
+            border: none;
             cursor: pointer;
-            border-radius: 50%;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.6);
+            z-index: 1000;
         }
 
-        #calendar-button img:hover {
+        #top-right-button img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        #top-right-button img:hover {
             transform: scale(1.1);
         }
-
     </style>
 </head>
-<body>
+<body>  
     <audio id="bg-music" loop>
         <source src="back-music.mp3" type="audio/mpeg">
         <source src="background-music.ogg" type="audio/ogg">
         Your browser does not support the audio element.
     </audio>
-
-    <!-- Clickable Image Button (Calendar) -->
-    <div id="calendar-button">
-        <a href="Calendar.html">
-            <img src="Calendar1.jpg" alt="Calendar" width="50" height="50">
-        </a>
-    </div>
-
+    
     <div id="loading-screen">
         <div id="loading-bar-container">
             <div id="loading-bar">
@@ -174,6 +168,11 @@
         </div>
         <button id="start-button">START</button>
     </div>
+
+    <!-- Top Right Button -->
+    <button id="top-right-button">
+        <img src="Calendar1.jpg" alt="Button">
+    </button>
 
     <div class="scroll-container">
         <div class="carousel">
@@ -235,27 +234,25 @@
                 audio.play();
                 loadingScreen.style.display = 'none';
                 scrollContainer.style.display = 'block';
+            });
 
-                document.querySelectorAll('.carousel-slide').forEach(slide => {
-                    slide.addEventListener('click', () => {
-                        let choiceText = slide.querySelector("p").textContent.trim();
+            document.getElementById("top-right-button").addEventListener("click", function() {
+                window.location.href = "calendar.html";
+            });
 
-                        let pages = {
-                            "Anger": "anger-choices.html",
-                            "Sadness": "sadness-choices.html",
-                            "Fear": "fear-choices.html",
-                            "Anxiety": "anxiety-choices.html",
-                            "Ennui": "ennui-choices.html"
-                        };
-
-                        if (pages[choiceText]) {
-                            window.location.href = pages[choiceText];
-                        } else {
-                            alert("Page not found!");
-                        }
-                    });
+            document.querySelectorAll('.carousel-slide').forEach(slide => {
+                slide.addEventListener('click', () => {
+                    let choiceText = slide.querySelector("p").textContent.trim();
+                    let pages = {
+                        "Anger": "anger-choices.html",
+                        "Sadness": "sadness-choices.html",
+                        "Fear": "fear-choices.html",
+                        "Anxiety": "anxiety-choices.html",
+                        "Ennui": "ennui-choices.html"
+                    };
+                    window.location.href = pages[choiceText];
                 });
-            });  
+            });
         };
     </script>
 </body>
