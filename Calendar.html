@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Smart Calendar Diary</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(120deg, #f093fb, #f5576c);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .calendar-container {
+            width: 95vw;
+            max-width: 380px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .nav-btn {
+            background: #ff4757;
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .days, .dates {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .day {
+            background: #ff9f1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .date {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .date:active {
+            transform: scale(1.1);
+            background: #ffbe76;
+            color: white;
+        }
+
+        .slide {
+            position: fixed;
+            top: 0;
+            left: 100%;
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slide-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #ff4757;
+            color: white;
+            font-size: 18px;
+        }
+
+        .back-btn {
+            background: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 90%;
+            height: 200px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            resize: none;
+        }
+
+        .save-btn {
+            margin-top: 10px;
+            background: #1abc9c;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calendar-container">
+        <div class="header">
+            <button class="nav-btn" onclick="changeMonth(-1)">&#10094;</button>
+            <h2 id="monthYear"></h2>
+            <button class="nav-btn" onclick="changeMonth(1)">&#10095;</button>
+        </div>
+        <div class="days">
+            <div class="day">S</div> <div class="day">M</div> <div class="day">T</div>
+            <div class="day">W</div> <div class="day">T</div> <div class="day">F</div> <div class="day">S</div>
+        </div>
+        <div class="dates" id="dates"></div>
+    </div>
+
+    <div id="slides"></div>
+
+    <script>
+        let currentDate = new Date();
+
+        function renderCalendar() {
+            const monthYear = document.getElementById("monthYear");
+            const datesDiv = document.getElementById("dates");
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+            const lastDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+            
+            monthYear.innerText = currentDate.toLocaleString("default", { month: "long", year: "numeric" });
+            datesDiv.innerHTML = "";
+            document.getElementById("slides").innerHTML = ""; 
+
+            for (let i = 0; i < firstDay; i++) {
+                datesDiv.innerHTML += `<div></div>`;
+            }
+            for (let i = 1; i <= lastDate; i++) {
+                datesDiv.innerHTML += `<div class="date" onclick="openSlide(${i})">${i}</div>`;
+                document.getElementById("slides").innerHTML += `
+                    <div class="slide" id="slide-${i}">
+                        <div class="slide-header">
+                            <button class="back-btn" onclick="closeSlide(${i})">&#10094; Back</button>
+                            <span>${i} ${currentDate.toLocaleString("default", { month: "long" })}</span>
+                        </div>
+                        <textarea id="diaryEntry-${i}" placeholder="Write here..."></textarea>
+                        <button class="save-btn" onclick="saveEntry(${i})">Save</button>
+                    </div>
+                `;
+            }
+        }
+
+        function changeMonth(step) {
+            currentDate.setMonth(currentDate.getMonth() + step);
+            renderCalendar();
+        }
+
+        function openSlide(day) {
+            const key = getStorageKey(day);
+            document.getElementById(`diaryEntry-${day}`).value = localStorage.getItem(key) || "";
+            document.querySelector(".calendar-container").style.transform = "translateX(-100vw)";
+            document.getElementById(`slide-${day}`).style.transform = "translateX(-100vw)";
+        }
+
+        function closeSlide(day) {
+            document.querySelector(".calendar-container").style.transform = "translateX(0)";
+            document.getElementById(`slide-${day}`).style.transform = "translateX(100vw)";
+        }
+
+        function saveEntry(day) {
+            const key = getStorageKey(day);
+            localStorage.setItem(key, document.getElementById(`diaryEntry-${day}`).value);
+            closeSlide(day);
+        }
+
+        function getStorageKey(day) {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1; // Months are 0-based, so add 1
+            return `entry-${year}-${month}-${day}`;
+        }
+
+        renderCalendar();
+    </script>
+
+</body>
+</html>
