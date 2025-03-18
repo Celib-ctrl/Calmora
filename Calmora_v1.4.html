@@ -14,11 +14,79 @@
             overflow: hidden;
         }
 
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('loading-background.jpg') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+        }
+
+        /* Loading Bar Container */
+        #loading-bar-container {
+            position: relative;
+            width: 320px;
+            height: 20px;
+            background-color: rgba(255, 140, 0, 0.3);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 215, 0, 0.8);
+            box-shadow: 0 0 10px rgba(255, 140, 0, 0.9);
+        }
+
+        /* Loading Bar (Gradient Fill) */
+        #loading-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #ff4500, #ffd700);
+            border-radius: 20px;
+            transition: width 0.5s ease-out;
+        }
+
+        #loading-sun {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            top: 0px;
+            left: 0;
+            background: radial-gradient(circle, #ffd700, #ff8c00);
+            border-radius: 50%;
+            box-shadow: 0 0 8px #ffd700;
+            transition: left 0.5s ease-out;
+        }
+
+        /* Start Button */
+        #start-button {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #ffd700;
+            color: black;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.6);
+        }
+
+        #start-button:hover {
+            background-color: #ff4500;
+        }
+
         .scroll-container {
             height: 100vh;
             overflow-y: auto;
             padding: 20px 0;
             scroll-behavior: smooth;
+            display: none;
             background: url('rotation.gif') no-repeat center center fixed;
             background-size: cover;
             background-color: rgba(255, 255, 255, 0.8);
@@ -61,14 +129,51 @@
             color: #aab2e6;
             text-align: center;
         }
+
+        /* Calendar Button Styling */
+        #calendar-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10000;
+        }
+
+        #calendar-button img {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.6);
+        }
+
+        #calendar-button img:hover {
+            transform: scale(1.1);
+        }
+
     </style>
 </head>
-<body>  
+<body>
     <audio id="bg-music" loop>
         <source src="back-music.mp3" type="audio/mpeg">
         <source src="background-music.ogg" type="audio/ogg">
         Your browser does not support the audio element.
     </audio>
+
+    <!-- Clickable Image Button (Calendar) -->
+    <div id="calendar-button">
+        <a href="Calendar.html">
+            <img src="Calendar1.jpg" alt="Calendar" width="50" height="50">
+        </a>
+    </div>
+
+    <div id="loading-screen">
+        <div id="loading-bar-container">
+            <div id="loading-bar">
+                <div id="loading-sun"></div>
+            </div>
+        </div>
+        <button id="start-button">START</button>
+    </div>
 
     <div class="scroll-container">
         <div class="carousel">
@@ -100,40 +205,58 @@
         </div>
     </div>
 
-<audio id="bg-music" autoplay loop>
-    <source src="back-music.mp3" type="audio/mpeg">
-    <source src="background-music.ogg" type="audio/ogg">
-    Your browser does not support the audio element.
-</audio>
+    <script>
+        window.onload = function() {
+            let loadingBar = document.getElementById('loading-bar');
+            let loadingSun = document.getElementById('loading-sun');
+            let loadingScreen = document.getElementById('loading-screen');
+            let startButton = document.getElementById('start-button');
+            let scrollContainer = document.querySelector('.scroll-container');
+            let audio = document.getElementById("bg-music");
 
-<script>
-    window.onload = function() {
-        let audio = document.getElementById("bg-music");
+            let progress = 0;
+            let interval = setInterval(() => {
+                progress += 5;
+                loadingBar.style.width = progress + "%";
+                loadingSun.style.left = (progress * 3) + "px";
 
-        // Attempt to play the audio
-        audio.play().catch(error => {
-            console.log("Autoplay blocked, attempting to play on user interaction.");
-            document.addEventListener("click", () => audio.play(), { once: true });
-        });
-
-        document.querySelectorAll('.carousel-slide').forEach(slide => {
-            slide.addEventListener('click', () => {
-                let choiceText = slide.querySelector("p").textContent.trim();
-
-                let pages = {
-                    "Anger": "anger-choices.html",
-                    "Sadness": "sadness-choices.html",
-                    "Fear": "fear-choices.html",
-                    "Anxiety": "anxiety-choices.html",
-                    "Ennui": "ennui-choices.html"
-                };
-
-                if (pages[choiceText]) {
-                    window.location.href = pages[choiceText];
-                } else {
-                    alert("Page not found!");
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loadingBar.style.display = 'none';
+                        loadingSun.style.display = 'none';
+                        startButton.style.display = 'block';
+                    }, 500);
                 }
-            });
-        });
-    };
-</script>
+            }, 200);
+
+            startButton.addEventListener('click', function() {
+                audio.muted = false;
+                audio.play();
+                loadingScreen.style.display = 'none';
+                scrollContainer.style.display = 'block';
+
+                document.querySelectorAll('.carousel-slide').forEach(slide => {
+                    slide.addEventListener('click', () => {
+                        let choiceText = slide.querySelector("p").textContent.trim();
+
+                        let pages = {
+                            "Anger": "anger-choices.html",
+                            "Sadness": "sadness-choices.html",
+                            "Fear": "fear-choices.html",
+                            "Anxiety": "anxiety-choices.html",
+                            "Ennui": "ennui-choices.html"
+                        };
+
+                        if (pages[choiceText]) {
+                            window.location.href = pages[choiceText];
+                        } else {
+                            alert("Page not found!");
+                        }
+                    });
+                });
+            });  
+        };
+    </script>
+</body>
+</html>
